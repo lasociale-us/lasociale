@@ -16,11 +16,11 @@ import java.util.logging.Logger;
  */
 public class ActivityStorage {
 
-    private static String FILENAME = "activity.log";
+    private static String FILENAME = "activity2.log";
     private static Logger log = Logger.getLogger("us.lasociale.logger");
 
     public static void Write(Context context, boolean isPresent) {
-        String s = new Date().toString() + "," + (isPresent ? "ON" : "OFF") + "\n";
+        String s = Long.toString(new Date().getTime()) + "," + (isPresent ? "ON" : "OFF") + "\n";
 
 
         log.info(s);
@@ -48,7 +48,7 @@ public class ActivityStorage {
             {
                 log.info("Read: " + s);
                 String[] fields = s.split(",");
-                Date d = new Date(fields[0]);
+                Date d = new Date(Long.parseLong(fields[0]));
                 if (last == null) {
                     last = d;
                     isActive = fields[1].equals("ON");
@@ -84,7 +84,7 @@ public class ActivityStorage {
         }
 
         catch (IOException ex) {
-            log.severe("Failed to write log " + ex.toString());
+            log.severe("Failed to read log " + ex.toString());
             // ignore; can't do much about it
         }
         return 0;
