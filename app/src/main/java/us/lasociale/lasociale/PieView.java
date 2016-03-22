@@ -24,6 +24,7 @@ public class PieView extends View {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setColor(Color.BLUE);
 
+
         mContext = context;
 
     }
@@ -31,9 +32,15 @@ public class PieView extends View {
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         mPaint.setColor(Color.RED);
-        RectF r = new RectF(10,10,600,600);
+        RectF r = new RectF(10,10,400,400);
         float f = ActivityStorage.ReadActivity(mContext);
         canvas.drawArc(r, -90f, f * 360, true, mPaint);
+
+        String t = ActivityStorage.ReadActivityState(mContext);
+        mPaint.setTextSize(24);
+        canvas.drawText(t, 100,500, mPaint);
+
+        ActivityStorage.Log(mContext, "SHOWING: ");
     }
 
 }

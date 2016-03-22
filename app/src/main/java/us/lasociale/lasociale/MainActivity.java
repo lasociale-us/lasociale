@@ -17,9 +17,8 @@ import java.util.logging.Logger;
 public class MainActivity extends AppCompatActivity {
 
     private static Logger log = Logger.getLogger("us.lasociale.main");
-    private static long MILLISECONDS_TILL_UPDATE = 1000 * 30;
+    private static long MILLISECONDS_TILL_UPDATE = 1000 * 5;
 
-    private static UserPresentListener userPresentListener = new UserPresentListener();
 
     Handler viewHandler = new Handler();
     Runnable updateView;
@@ -28,19 +27,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
 
-
-
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(userPresentListener, filter);
         MainActivity act = this;
         updateView = new Runnable(){
+
             @Override
             public void run(){
-                log.info("Updating VIEW");
-
+                //log.info("Updating VIEW");
 
                 findViewById(R.id.pieview).invalidate();
                 viewHandler.postDelayed(updateView, MILLISECONDS_TILL_UPDATE);
@@ -49,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
 
         updateView.run();
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewHandler.removeCallbacks(updateView);
     }
 
     @Override
