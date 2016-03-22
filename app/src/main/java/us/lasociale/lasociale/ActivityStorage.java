@@ -56,9 +56,9 @@ public class ActivityStorage {
 
     }
 
-    public static void Send(String doc, long seconds) {
+    public static void Send(String doc, long seconds, long elapsed) {
 
-        new Uploader().execute(doc, Long.toString(seconds));
+        new Uploader().execute(doc, Long.toString(seconds), Long.toString(elapsed));
     }
 
 
@@ -101,7 +101,7 @@ public class ActivityStorage {
 
             String user = IdentityManager.GetPublicKey(context);
             String doc = user + "-" + endOfRun.toString().substring(0,13);
-            Send(doc, recorded);
+            Send(doc, recorded, 3600);
             Log(context, "SENDING: ");
             log.info("USER=" + user);
 

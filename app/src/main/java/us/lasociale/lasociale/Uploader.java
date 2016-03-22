@@ -29,6 +29,7 @@ public class Uploader extends AsyncTask<String, Void, String> {
 
         String doc = params[0];
         long seconds = Long.parseLong(params[1]);
+        long elapsed = Long.parseLong(params[2]);
         String http = SERVER + doc;
 
 
@@ -50,7 +51,9 @@ public class Uploader extends AsyncTask<String, Void, String> {
 
             //Create JSONObject here
             JSONObject jsonParam = new JSONObject();
-            jsonParam.put("active", seconds);
+            jsonParam.put("lasociale", elapsed - seconds);
+            jsonParam.put("elapsed", elapsed );
+
 
 
             /*
