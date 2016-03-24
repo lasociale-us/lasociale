@@ -17,6 +17,8 @@ public class MainApp extends Application {
 
     private static UserPresentListener userPresentListener = new UserPresentListener();
 
+    static{ System.loadLibrary("opencv_java3"); }
+
     @Override
     public void onCreate() {
         super.onCreate();

@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import android.os.Handler;
+import android.widget.Button;
+
 import java.util.logging.Logger;
 
 public class MainActivity extends AppCompatActivity {
@@ -44,6 +46,19 @@ public class MainActivity extends AppCompatActivity {
 
         updateView.run();
 
+        final Button button = (Button) findViewById(R.id.cam_button);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                StartCamarea();
+            }
+        });
+
+
+    }
+
+    private void StartCamarea() {
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -73,5 +88,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
 }
