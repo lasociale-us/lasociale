@@ -9,7 +9,10 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.logging.Logger;
 
@@ -26,10 +29,12 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         log.info("called onCreate");
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_camera);
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.HelloOpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+
 
     }
 
@@ -70,7 +75,22 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
+        Mat mat = inputFrame.rgba();
+        Mat roiTmp = mat.clone();
 
-        return inputFrame.rgba();
+        Mat out1 = new Mat();
+        Mat out2 = new Mat();
+
+        Imgproc.cvtColor(roiTmp, out1, Imgproc.COLOR_RGBA2BGR,0);
+        Imgproc.cvtColor(out1, out1, Imgproc.COLOR_BGR2HSV, 0);
+        Core.inRange(out1, new Scalar(88, 180, 180), new Scalar(92, 255, 255), out1);
+        //Core.inRange(roiTmp, new Scalar(170, 70, 30), new Scalar(180, 255, 255), out2);
+
+        //Mat out3 = out1 | out2;
+
+
+        Imgproc.cvtColor(out1, mat, Imgproc.COLOR_GRAY2RGBA, 0);
+
+        return mat;
     }
 }
