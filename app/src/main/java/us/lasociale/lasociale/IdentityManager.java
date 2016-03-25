@@ -13,7 +13,7 @@ import java.security.spec.ECGenParameterSpec;
  * Created by tomas on 22-3-16.
  */
 public class IdentityManager {
-    private static String PREF_NAME = "lasociale-sec.6";
+    private static String PREF_NAME = "lasociale-sec.7";
 
     private static String S_PUB = "pub";
     private static String S_PRV = "prv";
@@ -65,11 +65,19 @@ public class IdentityManager {
             MessageDigest digest=null;
             digest = MessageDigest.getInstance("SHA-256");
 
+            byte[] id = new byte[10];
             byte[] hash = digest.digest(kp.getPublic().getEncoded());
+
+            hash[6] = (byte) 0xC3; // identifier
+            hash[7] = 0;
+            for(int n=0; n<10; n++) {
+                if (n!=7)
+                    hash[7] ^= hash[n];
+            }
 
 
             editor.putString(S_PUB, Base64.encodeToString(kp.getPublic().getEncoded(), Base64.DEFAULT));
-            editor.putString(S_HASH, toHexString(hash).trim().substring(0,20));
+            editor.putString(S_HASH, toHexString(hash).trim().substring(0,16));
             editor.putString(S_PRV, Base64.encodeToString(kp.getPrivate().getEncoded(), Base64.DEFAULT));
             editor.commit();
         }
