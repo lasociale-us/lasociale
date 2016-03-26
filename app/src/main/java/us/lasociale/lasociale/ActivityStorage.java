@@ -92,7 +92,7 @@ public class ActivityStorage {
 
         DateTime endOfRun = roundDate(lastStamp);
 
-        log.info("NOW=" + now.toString() + ",  LASTSTAMP=" + lastStamp.toString() + ", ENDOFRUN=" + endOfRun.toString());
+        //log.info("NOW=" + now.toString() + ",  LASTSTAMP=" + lastStamp.toString() + ", ENDOFRUN=" + endOfRun.toString());
 
         while (now.isAfter(endOfRun)) {
             if (lastActive) {
