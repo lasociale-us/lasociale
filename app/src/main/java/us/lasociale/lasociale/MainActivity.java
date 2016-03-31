@@ -2,7 +2,10 @@ package us.lasociale.lasociale;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Looper;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +16,7 @@ import android.view.MenuItem;
 
 import android.os.Handler;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import java.util.logging.Logger;
 
@@ -22,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private static long MILLISECONDS_TILL_UPDATE = 1000 * 5;
 
 
-    Handler viewHandler = new Handler();
+    Handler viewHandler;
     Runnable updateView;
 
     @Override
@@ -33,20 +37,22 @@ public class MainActivity extends AppCompatActivity {
         //setSupportActionBar(toolbar);
 
         MainActivity act = this;
-        updateView = new Runnable(){
+        // Defines a Handler object that's attached to the UI thread
+        viewHandler = new Handler(Looper.getMainLooper()) {
 
             @Override
-            public void run(){
-                //log.info("Updating VIEW");
+            public void handleMessage(Message inputMessage) {
+                // Gets the image task from the incoming Message object.
+               Bitmap img = (Bitmap) inputMessage.obj;
+                ImageView view = (ImageView)findViewById(R.id.imageView);
+                view.setImageBitmap(img);
+                log.info("Received image: " + img.getWidth() + "x" + img.getHeight());
 
-                findViewById(R.id.pieview).invalidate();
-                viewHandler.postDelayed(updateView, MILLISECONDS_TILL_UPDATE);
             }
         };
 
-        updateView.run();
-
         final Button button = (Button) findViewById(R.id.cam_button);
+
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 StartCamarea();
@@ -56,10 +62,25 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void loadImage() {
+        ActivityStorage.Write(this, true, viewHandler);
+
+
+
+    }
+
     private void StartCamarea() {
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadImage();
+
+    }
+
 
     @Override
     protected void onDestroy() {

@@ -2,6 +2,7 @@ package us.lasociale.lasociale;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 
 
 import org.apache.http.params.HttpConnectionParams;
@@ -41,28 +42,31 @@ public class ActivityStorage {
 
     private static Logger log = Logger.getLogger("us.lasociale.logger");
 
+    private static DateTime lastSend = null;
 
     private static DateTime roundDateDown(final DateTime dateTime) {
-        return roundDate(dateTime.minusHours(1));
+        return roundDate(dateTime.minusDays(1));
     }
 
     private static DateTime roundDate(final DateTime dateTime) {
 
         return new DateTime(
                 dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(),
-                dateTime.getHourOfDay(), 0, 0, dateTime.getZone())
-                .plusHours(1);
+                0, 0, 0, dateTime.getZone())
+                .plusDays(1);
 
 
     }
 
-    public static void Send(String doc, long seconds, long elapsed) {
+    public static void Send(String doc, long seconds, long elapsed, Handler imageReceiver) {
 
-        new Uploader().execute(doc, Long.toString(seconds), Long.toString(elapsed));
-    }
+        Uploader.UploadParams params = new Uploader.UploadParams();
+        params.imageReceiver = imageReceiver;
+        params.lasociale = elapsed - seconds;
+        params.elapsed = elapsed;
+        params.document = doc;
 
-
-    public static void Reset(boolean isPresent) {
+        new Uploader().execute(params);
     }
 
 
@@ -77,14 +81,15 @@ public class ActivityStorage {
     }
 
 
-    public static void Write(Context context, boolean isPresent) {
+
+    public static void Write(Context context, boolean isPresent, Handler imageReceiver) {
 
         DateTime now = new DateTime().withZone(DateTimeZone.UTC);
-
 
         String s = now.toString() + "," + (isPresent ? "ON" : "OFF") + "\n";
 
 
+        // get last saved stuff
         SharedPreferences settings = context.getSharedPreferences(PREF_NAME, 0);
         DateTime lastStamp         = new DateTime(settings.getString(S_LASTSTAMP, now.toString())).withZone(DateTimeZone.UTC);
         long recorded              = settings.getLong(S_RECORDED_SECS, 0);
@@ -95,40 +100,47 @@ public class ActivityStorage {
         //log.info("NOW=" + now.toString() + ",  LASTSTAMP=" + lastStamp.toString() + ", ENDOFRUN=" + endOfRun.toString());
 
         while (now.isAfter(endOfRun)) {
+
+            // active till end of day?
             if (lastActive) {
                 recorded += new Duration(lastStamp, endOfRun).getStandardSeconds();
             }
 
             String user = IdentityManager.GetPublicKey(context);
-            String doc = user + "-" + endOfRun.toString().substring(0,13);
-            Send(doc, recorded, 3600);
+            String doc = user + "-" + endOfRun.toString().substring(0,10);
+            Send(doc, recorded, 3600 * 24, null);
             Log(context, "SENDING: ");
             log.info("USER=" + user);
 
             recorded =  0;
             lastStamp = endOfRun;
             endOfRun = roundDate(lastStamp);
-
-
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putLong(S_RECORDED_SECS, recorded);
-            editor.putBoolean(S_LASTACTIVE, isPresent);
-            editor.putString(S_LASTSTAMP, now.toString());
-            editor.commit();
         }
-        if (lastActive == isPresent)
-            return;
 
+        // update until now
         if (lastActive) {
             recorded += new Duration(lastStamp, now).getStandardSeconds();
         }
 
+
+        // see if we need to update the image
+        if (imageReceiver != null) {
+            log.info("Downloading image");
+            String user = IdentityManager.GetPublicKey(context);
+            String doc = user + "-" + endOfRun.toString().substring(0,10);
+            DateTime startOfRun = roundDateDown(now);
+            Send(doc, recorded, new Duration(startOfRun, now).getStandardSeconds(), imageReceiver);
+
+        }
+
+        // save in prefs
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(S_RECORDED_SECS, recorded);
         editor.putBoolean(S_LASTACTIVE, isPresent);
         editor.putString(S_LASTSTAMP, now.toString());
         editor.commit();
         Log(context, "SAVING: ");
+
 
     }
 
@@ -138,7 +150,7 @@ public class ActivityStorage {
         SharedPreferences settings = context.getSharedPreferences(PREF_NAME, 0);
         boolean lastActive         = settings.getBoolean(S_LASTACTIVE, false);
 
-        Write(context, lastActive);
+        Write(context, lastActive, null);
 
     }
 
@@ -167,7 +179,6 @@ public class ActivityStorage {
     public static float ReadActivity(Context context) {
 
         Rewrite(context);
-        Rewrite(context);
 
         DateTime now = new DateTime().withZone(DateTimeZone.UTC);
         SharedPreferences settings = context.getSharedPreferences(PREF_NAME, 0);
@@ -185,59 +196,7 @@ public class ActivityStorage {
 
 
         return (float)recorded / (float)elapsed;
-        /*
-        Date now = new Date();
-        Date last = null;
-        boolean isActive = false;
-        long totalSecs = 0;
-        try {
-            BufferedReader rdr = new BufferedReader(new InputStreamReader(context.openFileInput(FILENAME)));
-            String s = "";
-            while((s = rdr.readLine()) != null)
-            {
-                log.info("Read: " + s);
-                String[] fields = s.split(",");
-                Date d = new Date(Long.parseLong(fields[0]));
-                if (last == null) {
-                    last = d;
-                    isActive = fields[1].equals("ON");
-                }
-                else if (fields[1].equals("ON"))
-                {
-                    isActive = true;
-                }
-                else {
-                    if (isActive) {
-                        // count activity seconds
-                        long diff = d.getTime() - last.getTime();
-                        log.info("Found active:" + diff);
-                        totalSecs += (diff/1000);
-                    }
 
-                    isActive = false;
-                }
-                last = d;
-
-            }
-            rdr.close();
-            if (last != null && isActive) {
-                // count activity seconds
-                long diff = now.getTime() - last.getTime();
-                log.info("Found active:" + diff);
-                totalSecs += (diff/1000);
-
-            }
-            float total = (float)totalSecs / (float)(60*60*24);
-            log.info("Total active" + total);
-            return total;
-        }
-
-        catch (IOException ex) {
-            log.severe("Failed to read log " + ex.toString());
-            // ignore; can't do much about it
-        }
-        return 0;
-        */
     }
 
 }

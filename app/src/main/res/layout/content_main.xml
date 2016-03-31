@@ -12,12 +12,13 @@
     tools:showIn="@layout/activity_main" tools:context=".MainActivity">
 
 
-
-
-    <us.lasociale.lasociale.PieView
-        android:id="@+id/pieview"
+    <ImageView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="fill_parent"
+        android:id="@+id/imageView"
+         />
+
+
 
     <Button
         android:layout_width="wrap_content"
@@ -26,6 +27,8 @@
         android:id="@+id/cam_button"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="115dp" />
+        android:layout_marginBottom="15dp" />
+
+
 
 </RelativeLayout>

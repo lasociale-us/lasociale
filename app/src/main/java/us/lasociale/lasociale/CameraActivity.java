@@ -83,7 +83,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
-        int hueCentre = 312;
+        int hueCentre = 76;
         Mat original = inputFrame.rgba();
         Mat display = original.clone();
 
@@ -101,7 +101,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         // Core.inRange(out1, new Scalar(87, 80, 80), new Scalar(93, 255, 255), out1);
 
         // extract center by hue
-        Core.inRange(matHSV, new Scalar((hueCentre / 2) - 3, 70, 70), new Scalar((hueCentre / 2) + 3, 255, 255), matCenter);
+        Core.inRange(matHSV, new Scalar((hueCentre / 2) - 4, 70, 70), new Scalar((hueCentre / 2) + 4, 255, 255), matCenter);
+
 
         // extract surroung by value
         Core.inRange(matHSV, new Scalar(0, 0, 0), new Scalar(255, 255, 60), matSurround);
@@ -117,10 +118,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         Imgproc.findContours(matCenter, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
 
+        log.info("Countours:" + contours.size());
         for (MatOfPoint contour:
              contours) {
 
             Point[] pts = contour.toArray();
+            Imgproc.drawMarker(display, pts[0], new Scalar(255,0,0,0));
+            /*
+
             if (pts.length < 5)
                 continue;
 
@@ -155,7 +160,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 /*
                 pt2.x += Math.cos(angle) * (r.size.width/2);
                 pt2.y += Math.sin(angle) * (r.size.height/2);
-*/
+
                 double x1 = Math.cos(angle) * (r.size.width/2);
                 double y1 = Math.sin(angle) * (r.size.height/2);
 
@@ -172,10 +177,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 angle += step;
 
             }
+            */
 
 
 
-            Imgproc.drawMarker(display, r.center, new Scalar(255,0,0,0));
 
         }
 

@@ -1,13 +1,20 @@
 package us.lasociale.lasociale;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 
+import org.apache.http.params.HttpParams;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -18,22 +25,28 @@ import java.util.logging.Logger;
 /**
  * Created by tomas on 22-3-16.
  */
-public class Uploader extends AsyncTask<String, Void, String> {
+public class Uploader extends AsyncTask<Uploader.UploadParams, Void, byte[]> {
 
     private static Logger log = Logger.getLogger("us.lasociale.uploader");
     private static String SERVER =   "http://185.77.131.115:3333/";
 
-    protected String doInBackground(String... params) {
+    public static class UploadParams {
+        public String document;
+        public long   elapsed;
+        public long   lasociale;
+        public Handler imageReceiver;
+
+    };
+
+    protected byte[] doInBackground(UploadParams... params) {
 
         StringBuilder sb = new StringBuilder();
 
-        String doc = params[0];
-        long seconds = Long.parseLong(params[1]);
-        long elapsed = Long.parseLong(params[2]);
-        String http = SERVER + doc;
+        UploadParams param = params[0];
+        String http = SERVER + param.document;
 
 
-        log.info("SENDING TO" + http);
+        log.info("SENDING TO:" + http);
 
         HttpURLConnection urlConnection=null;
         try {
@@ -46,13 +59,18 @@ public class Uploader extends AsyncTask<String, Void, String> {
             urlConnection.setReadTimeout(10000);
             urlConnection.setRequestProperty("Content-Type","application/json");
 
+            if (param.imageReceiver != null)
+                urlConnection.setRequestProperty("Accept","image/png");
+            else
+                urlConnection.setRequestProperty("Accept","application/json");
+
             urlConnection.setRequestProperty("Host", "android.lasociale.us");
             urlConnection.connect();
 
             //Create JSONObject here
             JSONObject jsonParam = new JSONObject();
-            jsonParam.put("lasociale", elapsed - seconds);
-            jsonParam.put("elapsed", elapsed );
+            jsonParam.put("lasociale", param.lasociale);
+            jsonParam.put("elapsed", param.elapsed );
 
 
 
@@ -67,18 +85,41 @@ public class Uploader extends AsyncTask<String, Void, String> {
             out.close();
 
             int HttpResult =urlConnection.getResponseCode();
-            if(HttpResult ==HttpURLConnection.HTTP_OK){
-                BufferedReader br = new BufferedReader(new InputStreamReader(
-                        urlConnection.getInputStream(),"utf-8"));
-                String line = null;
-                while ((line = br.readLine()) != null) {
-                    sb.append(line + "\n");
+            log.info("HTTP RESONPOSE CODE=" + HttpResult);
+            if(HttpResult ==HttpURLConnection.HTTP_OK || HttpResult == HttpURLConnection.HTTP_CREATED){
+
+                if (param.imageReceiver == null)
+                {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(
+                            urlConnection.getInputStream(),"utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        log.info("Reading:" + line);
+                    }
+                    br.close();
                 }
-                br.close();
+                else
+                {
+                    byte[] buffer = new byte[1024*1024];
+                    int offset = 0;
+                    int read = 0;
+                    InputStream stream = urlConnection.getInputStream();
+                    while((read = stream.read(buffer, offset, buffer.length - offset)) > -1)
+                    {
+                        offset+=read;
+                    }
+                    log.info("Sending bitmap");
+                    Bitmap bmp = BitmapFactory.decodeByteArray(buffer, 0, offset);
+                    Message msg = param.imageReceiver.obtainMessage(0);
+                    msg.obj = bmp;
+                    msg.sendToTarget();
 
-                System.out.println(""+sb.toString());
+                }
 
-            }else{
+
+
+
+            } else {
                 System.out.println(urlConnection.getResponseMessage());
             }
         } catch (MalformedURLException e) {
@@ -93,14 +134,14 @@ public class Uploader extends AsyncTask<String, Void, String> {
                 urlConnection.disconnect();
         }
 
-        return "";
+        return new byte[] {0};
     }
 
     protected void onProgressUpdate(Void... progress) {
 
     }
 
-    protected void onPostExecute(String result) {
+    protected void onPostExecute(byte[] result) {
 
     }
 }

@@ -21,11 +21,11 @@ public class UserPresentListener extends BroadcastReceiver {
         if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
             // do whatever you need to do here
             log.info("Screen OFF");
-            ActivityStorage.Write(context, false);
+            ActivityStorage.Write(context, false, null);
         }
         else {
             log.info("Screen ON");
-            ActivityStorage.Write(context, true);
+            ActivityStorage.Write(context, true, null);
         }
 
 
