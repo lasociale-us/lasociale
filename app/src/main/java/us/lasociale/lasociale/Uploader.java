@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -32,8 +33,8 @@ public class Uploader extends AsyncTask<Uploader.UploadParams, Void, byte[]> {
 
     public static class UploadParams {
         public String document;
-        public long   elapsed;
-        public long   lasociale;
+        public String jsonData;
+        public Bitmap bitmapData;
         public Handler imageReceiver;
 
     };
@@ -57,7 +58,6 @@ public class Uploader extends AsyncTask<Uploader.UploadParams, Void, byte[]> {
             urlConnection.setUseCaches(false);
             urlConnection.setConnectTimeout(10000);
             urlConnection.setReadTimeout(10000);
-            urlConnection.setRequestProperty("Content-Type","application/json");
 
             if (param.imageReceiver != null)
                 urlConnection.setRequestProperty("Accept","image/png");
@@ -67,10 +67,6 @@ public class Uploader extends AsyncTask<Uploader.UploadParams, Void, byte[]> {
             urlConnection.setRequestProperty("Host", "android.lasociale.us");
             urlConnection.connect();
 
-            //Create JSONObject here
-            JSONObject jsonParam = new JSONObject();
-            jsonParam.put("lasociale", param.lasociale);
-            jsonParam.put("elapsed", param.elapsed );
 
 
 
@@ -80,9 +76,25 @@ public class Uploader extends AsyncTask<Uploader.UploadParams, Void, byte[]> {
             printout.flush();
             printout.close();
 */
-            OutputStreamWriter out = new   OutputStreamWriter(urlConnection.getOutputStream());
-            out.write(jsonParam.toString());
-            out.close();
+            if (param.jsonData != null) {
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+
+                OutputStreamWriter out = new   OutputStreamWriter(urlConnection.getOutputStream());
+
+                out.write(param.jsonData);
+                out.close();
+            }
+            else if (param.bitmapData != null)
+            {
+                urlConnection.setRequestProperty("Content-Type", "image/png");
+
+                OutputStream sOutput = urlConnection.getOutputStream();
+                param.bitmapData.compress(Bitmap.CompressFormat.PNG, 100, sOutput);
+                sOutput.close();
+
+            }
+
+
 
             int HttpResult =urlConnection.getResponseCode();
             log.info("HTTP RESONPOSE CODE=" + HttpResult);
@@ -127,9 +139,7 @@ public class Uploader extends AsyncTask<Uploader.UploadParams, Void, byte[]> {
         }
         catch (IOException e) {
             e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }finally{
+        } finally{
             if(urlConnection!=null)
                 urlConnection.disconnect();
         }

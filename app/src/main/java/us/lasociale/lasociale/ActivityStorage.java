@@ -62,8 +62,19 @@ public class ActivityStorage {
 
         Uploader.UploadParams params = new Uploader.UploadParams();
         params.imageReceiver = imageReceiver;
-        params.lasociale = elapsed - seconds;
-        params.elapsed = elapsed;
+
+        //Create JSONObject here
+        try {
+            JSONObject jsonParam = new JSONObject();
+            jsonParam.put("lasociale", elapsed - seconds);
+            jsonParam.put("elapsed", elapsed);
+            params.jsonData = jsonParam.toString(2);
+        }
+        catch(JSONException ex) {
+            log.severe("Can't render json");
+            ex.printStackTrace();
+        }
+        params.bitmapData = null;
         params.document = doc;
 
         new Uploader().execute(params);
