@@ -18,6 +18,7 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -83,7 +84,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
-        int hueCentre = 76;
+        int hueCentre1 = 146;
+        int hueCentre2 = 235;
         Mat original = inputFrame.rgba();
         Mat display = original.clone();
 
@@ -93,6 +95,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         Mat matHSV = new Mat();
 
         Mat matCenter = new Mat();
+        Mat matCenter2 = new Mat();
         Mat matSurround = new Mat();
 
         Imgproc.cvtColor(matTemp, matTemp2, Imgproc.COLOR_RGBA2BGR, 0);
@@ -100,17 +103,23 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
         // Core.inRange(out1, new Scalar(87, 80, 80), new Scalar(93, 255, 255), out1);
 
+        //Imgproc.blur(matHSV, matHSV, new Size(10,10));
         // extract center by hue
-        Core.inRange(matHSV, new Scalar((hueCentre / 2) - 4, 70, 70), new Scalar((hueCentre / 2) + 4, 255, 255), matCenter);
+        Core.inRange(matHSV, new Scalar((hueCentre1 *180 / 256) - 6, 0,100), new Scalar((hueCentre1 *180/256) + 6, 255, 165),matCenter);
+        //Core.inRange(matHSV, new Scalar((hueCentre2 * 180 / 256) - 4, 70, 70), new Scalar((hueCentre2 * 180 / 256) + 4, 255, 255), matCenter2);8
+        //Core.bitwise_or(matCenter, matCenter2, matCenter);
 
 
         // extract surroung by value
-        Core.inRange(matHSV, new Scalar(0, 0, 0), new Scalar(255, 255, 60), matSurround);
+        //Core.inRange(matHSV, new Scalar(0, 0, 0), new Scalar(255, 255, 60), matSurround);
+
 
         //Core.inRange(roiTmp, new Scalar(170, 70, 30), new Scalar(180, 255, 255), out2);
+        Mat lines = new Mat();
+        Imgproc.HoughLinesP(matCenter, lines, 1.0f, 0.1f, );
 
 
-        //Imgproc.cvtColor(matCenter, display, Imgproc.COLOR_GRAY2RGBA, 0);
+        Imgproc.cvtColor(matCenter, display, Imgproc.COLOR_GRAY2RGBA, 0);
 
 
         Mat hierarchy = new Mat();
@@ -121,13 +130,37 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         log.info("Countours:" + contours.size());
         for (MatOfPoint contour:
              contours) {
-
             Point[] pts = contour.toArray();
-            Imgproc.drawMarker(display, pts[0], new Scalar(255,0,0,0));
+            double arr = Imgproc.contourArea(contour, false);
+            //log.info("Contour: " + arr + "  pts=" + pts.length);
+            //Imgproc.drawMarker(display, pts[0], new Scalar(255,0,0,0));
             /*
-
             if (pts.length < 5)
                 continue;
+
+
+            if (arr < 4000)
+                continue;
+
+            MatOfPoint2f  contour2f = new MatOfPoint2f( contour.toArray() );
+
+            RotatedRect r = Imgproc.fitEllipse(contour2f);
+            Point[] rectPoints = new Point[4];
+            r.points(rectPoints);
+            for(int n=0; n < 4; n++) {
+                Imgproc.line(display, rectPoints[n], rectPoints[(n+1)%4],
+                        new Scalar(0,255,0));
+            }
+            double ellArr = r.size.area() * 3.14 / 4;
+            */
+
+            //if (arr < ellArr *.8 || arr > ellArr*1.1)
+            //    continue;
+
+            //Point[] pts = contour.toArray();
+            //
+            /*
+
 
             double arr = Imgproc.contourArea(contour, false);
 
