@@ -13,7 +13,7 @@ import java.security.spec.ECGenParameterSpec;
  * Created by tomas on 22-3-16.
  */
 public class IdentityManager {
-    private static String PREF_NAME = "lasociale-sec.8";
+    private static String PREF_NAME = "lasociale-sec.11";
 
     private static String S_PUB = "pub";
     private static String S_PRV = "prv";
@@ -21,7 +21,7 @@ public class IdentityManager {
 
 
     public static boolean IsNonce(String hash) {
-        return hash.substring(12,14).equals("BA");
+        return hash.substring(12,14).equals("ba");
     }
 
     public static boolean IsHash(String hash) {
@@ -40,6 +40,35 @@ public class IdentityManager {
         }
 
         return key;
+
+    }
+
+    public static void SetChecksum(byte[] bytes)
+    {
+        byte[] cs = GetChecksum(bytes);
+
+        bytes[8] = cs[0];
+        bytes[9] = cs[1];
+
+    }
+
+    public static boolean CheckChecksum(byte[] bytes)
+    {
+        byte[] cs = GetChecksum(bytes);
+        return cs[0] == bytes[8] && cs[1] == bytes[9];
+
+    }
+
+    public static byte[] GetChecksum(byte[] bytes)
+    {
+        long n1 = 0;
+        long n2;
+        int[] mult = new int[] { 17, 73, 14, 2, 27, 99, 101, 7};
+
+        for(int n =0; n < 8; n++)
+            n1 = n1 + ((bytes[n]&0xff) + ((bytes[n]&0xff) * mult[n])) & 0xFFFF;
+
+        return new byte[] { (byte)(n1 & 0xFF), (byte)((n1>>8)&0xFF)};
 
     }
 
@@ -83,12 +112,12 @@ public class IdentityManager {
             }
 
             hash[6] = (byte) 0x98; // identifier
-            hash[7] = 0;
-            for(int n=0; n<10; n++) {
-                if (n!=7)
-                    hash[7] ^= hash[n];
-            }
+            SetChecksum(hash);
 
+            if (!CheckChecksum(hash))
+            {
+                throw new RuntimeException("Checksum FAILS!");
+            }
 
             editor.putString(S_PUB, Base64.encodeToString(kp.getPublic().getEncoded(), Base64.DEFAULT));
             editor.putString(S_HASH, toHexString(hash).trim().substring(0,20));
@@ -98,7 +127,6 @@ public class IdentityManager {
         catch(Exception ex) {
             ex.printStackTrace();
         }
-
 
     }
 }

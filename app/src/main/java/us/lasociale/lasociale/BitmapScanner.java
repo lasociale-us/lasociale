@@ -212,20 +212,18 @@ public class BitmapScanner {
         byte[] bytes = new byte[10];
         String bitstriple = bits+bits+bits;
         String bitsrot = bitstriple.substring(n+32, n+112);
-        byte xor = 0;
         for(int m=0; m <10; m++)
         {
             bytes[m] = (byte)Integer.parseInt(bitsrot.substring(m * 8, m * 8 + 8), 2);
-            xor ^= bytes[m];
         }
 
         String hex = IdentityManager.toHexString(bytes);
-        if (xor == 0)
+        if (IdentityManager.CheckChecksum(bytes))
             return hex;
         else
         {
-            log.info("Invalid:"+hex+", xor="+xor);
-            return null;
+            log.info("Invalid:"+hex);
+            return CheckHash(bits, n+1);
         }
 
 

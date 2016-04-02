@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 else
                     msg = "Not understood: " +hash;
 
-                log.info("*** RESULT ****:" +hash);
+                log.info(msg);
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 
             }
