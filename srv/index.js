@@ -289,12 +289,59 @@ function handleRender(req, res) {
 }
 
 
+var sockets = {};
+
+function handleLink(req, res) {
+    console.log('LINK: ' + req.body.nonce + '=' + req.body.hash);
+
+    if (sockets[req.body.nonce])
+    {
+        sockets[req.body.nonce].sendText(req.body.hash);
+        res.status(200).end();
+    }
+    else
+    {
+        res.status(404).end();
+    }
+
+}
+
+function handleTest(req, res) {
+    var html = fs.readFileSync('test.html', {encoding:'utf8'});
+    res.setHeader('Content-Type', 'text/html');
+
+    res.send(html).end();
+}
+
+
 app.put(/^\/[^_].*/, handlePut);
 app.get(/^\/[^_].*/, handleGet);
 app.put(/^\/_testcase/, handleTestcase);
 app.get(/^\/_render/, handleRender);
+app.get(/^\/_test/, handleTest);
+app.put(/^\/_link/, handleLink);
 
 
 app.listen(3333);
 console.log("server is running.");
+
+var ws = require("nodejs-websocket")
+ 
+// Scream server example: "hi" -> "HI!!!" 
+var server = ws.createServer(function (conn) {
+    var nonce = 0;
+    console.log("New connection")
+    conn.on("text", function (str) {
+        console.log("Received "+str)
+        sockets[str] = conn;
+        nonce = str;
+        //conn.sendText(str.toUpperCase()+"!!!")
+    })
+    conn.on("close", function (code, reason) {
+        console.log("Connection closed")
+        delete sockets.nonce;
+    })
+}).listen(3334);
+
+console.log('WS-server listening');
 
