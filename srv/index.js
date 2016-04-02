@@ -107,7 +107,7 @@ function handleGet(req, res) {
         else
         {
             var we = body.rows[0].value;
-            returnResult(req, res, req.query.nonce, we);
+            returnResult(req, res, req.query.nonce||'00000000000000000000', we);
         }
     });
 }
@@ -152,9 +152,11 @@ function createSVG(req, hash, we, me)
     var centerX = 181.3; 
     var centerY = 214.9;
     var maxRadius = 140
+    var styleMe = ' style="fill:none;stroke:#EF5AA0;stroke-width:2.2677;stroke-miterlimit:10;" ';
+    var styleWe = ' style="fill:none;stroke:#37B34A;stroke-width:3.4016;stroke-miterlimit:10;" ';
+    var styleT1 = ' style="fill:none;stroke:#1B75BB;stroke-width:0.9921;stroke-miterlimit:10;" ';   
+    var styleT2 = ' style="fill:none;stroke:#9b7913;stroke-width:0.9921;stroke-miterlimit:10;" ';   
 
-    var color1 = 'style="stroke: #9b7913 !important;"';
-    var color0 = '';
 
     var radiusMe;
     if (me)
@@ -175,15 +177,15 @@ function createSVG(req, hash, we, me)
         angle = PI*2 * n / 80;
         var x2 = centerX + Math.cos(angle)*radiusMe;
         var y2 = centerY + Math.sin(angle)*radiusMe
-        linesMe += '<line x1="'+x1+'" y1="'+y1+'" x2="' + x2 + '" y2="' + y2 + '" />\n';
+        linesMe += '<line '+styleMe+' x1="'+x1+'" y1="'+y1+'" x2="' + x2 + '" y2="' + y2 + '" />\n';
 
         var x2 = centerX + Math.cos(angle)*radiusWe;
         var y2 = centerY + Math.sin(angle)*radiusWe
-        linesWe += '<line x1="'+x1+'" y1="'+y1+'" x2="' + x2 + '" y2="' + y2 + '" />\n';
+        linesWe += '<line '+styleWe+' x1="'+x1+'" y1="'+y1+'" x2="' + x2 + '" y2="' + y2 + '" />\n';
 
         var x2 = centerX + Math.cos(angle)*radiusTotal;
         var y2 = centerY + Math.sin(angle)*radiusTotal
-        var color = getBit(hash, n) ? color1 : color0;
+        var color = getBit(hash, n) ? styleT2 : styleT1;
         linesTotal += '<line ' + color + ' x1="'+x1+'" y1="'+y1+'" x2="' + x2 + '" y2="' + y2 + '" />\n';
 
         angle += step;

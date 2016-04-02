@@ -5,7 +5,7 @@
 	 height="640.001px" viewBox="0 0 360 640.001" style="enable-background:new 0 0 360 640.001;" xml:space="preserve">
 <style type="text/css">
     #total_0_x2C_35_sign line { ;fill:none;stroke:#1B75BB;stroke-width:0.9921;stroke-miterlimit:10; }
-    #total_0_x2C_35_sign line { ;fill:none;stroke:#1B75BB;stroke-width:0.9921;stroke-miterlimit:10; }
+    #total_0_x2C_35_sign line { fill:none;stroke:#1B75BB;stroke-width:0.9921;stroke-miterlimit:10; }
     #we_1_x2C_2 line { fill:none;stroke:#37B34A;stroke-width:3.4016;stroke-miterlimit:10; }
     #me_0_x2C_8 line { fill:none;stroke:#EF5AA0;stroke-width:2.2677;stroke-miterlimit:10; }
 </style>
