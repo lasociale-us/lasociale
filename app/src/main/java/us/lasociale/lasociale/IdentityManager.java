@@ -20,6 +20,14 @@ public class IdentityManager {
     private static String S_HASH = "hash";
 
 
+    public static boolean IsNonce(String hash) {
+        return hash.substring(12,14).equals("BA");
+    }
+
+    public static boolean IsHash(String hash) {
+        return hash.substring(12,14).equals("98");
+    }
+
     public static String GetPublicKey(Context context) {
         SharedPreferences settings = context.getSharedPreferences(PREF_NAME, 0);
 

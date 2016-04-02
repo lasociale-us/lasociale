@@ -1,5 +1,6 @@
 package us.lasociale.lasociale;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
@@ -17,6 +18,7 @@ import android.view.MenuItem;
 import android.os.Handler;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.logging.Logger;
 
@@ -71,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void StartCamarea() {
         Intent intent = new Intent(this, CameraActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, 1);
+
     }
 
     @Override
@@ -79,6 +82,31 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         loadImage();
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                String hash=data.getStringExtra("result");
+
+                String msg = "";
+                if (IdentityManager.IsHash(hash))
+                    msg = "Hash scanned: " + hash;
+                else if (IdentityManager.IsNonce(hash))
+                    msg = "Nonce scanned: " + hash;
+                else
+                    msg = "Not understood: " +hash;
+
+                log.info("*** RESULT ****:" +hash);
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
+        }
     }
 
 

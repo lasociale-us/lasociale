@@ -1,5 +1,7 @@
 package us.lasociale.lasociale;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +41,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
 
         log.info("called onCreate");
         super.onCreate(savedInstanceState);
@@ -97,7 +100,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         //log.info("Fount contours:" + contours.size());
         BitmapScanner scanner = new BitmapScanner(lastFrame);
 
-        scanner.Scan();
+        String hash = scanner.Scan();
+        if (hash != null)
+        {
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("result",hash);
+            setResult(Activity.RESULT_OK,returnIntent);
+            finish();
+        }
 
 
         return scanner.Display;
@@ -106,6 +116,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public void onClick(View v) {
         Bitmap bmp;
+        log.info("ONCLICK");
         synchronized (this) {
             bmp = Bitmap.createBitmap(lastFrame.width(), lastFrame.height(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(lastFrame,bmp);

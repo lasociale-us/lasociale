@@ -65,7 +65,6 @@ public class Uploader extends AsyncTask<Uploader.UploadParams, Void, byte[]> {
                 urlConnection.setRequestProperty("Accept","application/json");
 
             urlConnection.setRequestProperty("Host", "android.lasociale.us");
-            urlConnection.connect();
 
 
 
@@ -78,6 +77,7 @@ public class Uploader extends AsyncTask<Uploader.UploadParams, Void, byte[]> {
 */
             if (param.jsonData != null) {
                 urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.connect();
 
                 OutputStreamWriter out = new   OutputStreamWriter(urlConnection.getOutputStream());
 
@@ -87,12 +87,17 @@ public class Uploader extends AsyncTask<Uploader.UploadParams, Void, byte[]> {
             else if (param.bitmapData != null)
             {
                 urlConnection.setRequestProperty("Content-Type", "image/png");
+                urlConnection.connect();
 
                 OutputStream sOutput = urlConnection.getOutputStream();
                 param.bitmapData.compress(Bitmap.CompressFormat.PNG, 100, sOutput);
                 sOutput.close();
 
             }
+            else
+                urlConnection.connect();
+
+
 
 
 
