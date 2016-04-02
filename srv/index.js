@@ -15,7 +15,7 @@ var doc_regex = /^[a-z0-9]{20}-\d{4}-\d{2}-\d{2}$/;
 var JPEG_QUALITY = 50;
 
 app.use(bodyParser.json()); // for parsing json
-app.use(bodyParser.raw({type:'image/*', limit:200*1024})); // for parsing testcases
+app.use(bodyParser.raw({type:'image/*', limit:2*1024*1024})); // for parsing testcases
 
 // load template
 var svgTemplate = fs.readFileSync('template.svg', {encoding:'utf8'});
@@ -100,13 +100,14 @@ function handleGet(req, res) {
                     return;
                 }
                 var we = body.rows[0].value;
-                returnResult(req, res, 'xx', we, me);
+                var hash = docname.replace(/-.*$/g, '');
+                returnResult(req, res, hash, we, me);
             });
         }
         else
         {
             var we = body.rows[0].value;
-            returnResult(req, res, 'xx', we);
+            returnResult(req, res, req.query.nonce, we);
         }
     });
 }
@@ -141,20 +142,25 @@ function getMimeType(req) {
 function getBit(hash, n) {
     var nibble = hash.substr(Math.floor(n/4),1);
     var nibval = parseInt(nibble, 16);
-    var isset = ((1 <<(n%4)) & nibval)>0;
+    var isset = ((1 <<(3-(n%4))) & nibval)>0;
     return isset;
 }
 
 function createSVG(req, hash, we, me)
 {
+    console.log('creating for hash', hash);
     var centerX = 181.3; 
     var centerY = 214.9;
     var maxRadius = 140
 
-    var color1 = 'style="stroke: #edcd6a !important;"';
+    var color1 = 'style="stroke: #9b7913 !important;"';
     var color0 = '';
 
-    var radiusMe = maxRadius * (me.lasociale / me.elapsed);
+    var radiusMe;
+    if (me)
+        radiusMe = maxRadius * (me.lasociale / me.elapsed);
+    else
+        radiusMe = 0;
     var radiusWe = maxRadius * (we.lasociale / we.elapsed) ;
     var radiusTotal = 159;
     var PI = 3.14159
@@ -197,12 +203,15 @@ function createSVG(req, hash, we, me)
     //reload template
     var svgTemplate = fs.readFileSync('template.svg', {encoding:'utf8'});
     var style = '#me_2_ { transform: scale(0.2); }\n';
-    return (svgTemplate
+    var resp = svgTemplate
         .replace('<!--STYLE-->', style)
-        .replace('<!--MECONTENT-->', total)
-        .replace('<!--ME-->',  Math.round(100*me.lasociale / me.elapsed)+'%' )
-        .replace('<!--WE-->', Math.round(100*we.lasociale / we.elapsed)+'%' )
-    );
+        .replace('<!--MECONTENT-->', total);
+    if (me)
+        resp = resp.replace('<!--ME-->',  Math.round(100*me.lasociale / me.elapsed)+'%' )
+    if (we)
+        resp = resp.replace('<!--WE-->', Math.round(100*we.lasociale / we.elapsed)+'%' )
+    
+    return resp;
 }
 
 // sends the image or json to the client
