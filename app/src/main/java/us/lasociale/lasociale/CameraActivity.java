@@ -94,22 +94,30 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
+        log.info("Start Receive Frame");
         synchronized (this) {
             lastFrame = inputFrame.rgba();
         }
         //log.info("Fount contours:" + contours.size());
         BitmapScanner scanner = new BitmapScanner(lastFrame);
 
-        String hash = scanner.Scan();
-        if (hash != null)
-        {
-            Intent returnIntent = new Intent();
-            returnIntent.putExtra("result",hash);
-            setResult(Activity.RESULT_OK,returnIntent);
-            finish();
+        try {
+
+            String hash = scanner.Scan();
+            if (hash != null)
+            {
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("result",hash);
+                setResult(Activity.RESULT_OK,returnIntent);
+                finish();
+            }
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
         }
 
 
+        log.info("End Receive Frame");
         return scanner.Display;
     }
 

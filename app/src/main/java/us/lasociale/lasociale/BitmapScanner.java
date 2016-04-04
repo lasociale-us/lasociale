@@ -51,7 +51,7 @@ public class BitmapScanner {
 
     public RotatedRect findEllipse(Mat input) {
 
-
+        log.info("findEllipse");
         Mat matGray = new Mat();
 
         Imgproc.cvtColor(input, matGray, Imgproc.COLOR_BGR2GRAY, 0);
@@ -102,11 +102,15 @@ public class BitmapScanner {
 
     public List<byte[]> FindPoints(RotatedRect rect, Mat hsv)
     {
+        log.info("findPoints");
         int n;
 
         int minval = 255;
         int minvaln=0;
         List<byte[]> pixs = new ArrayList<byte[]>();
+
+        int width = hsv.width();
+        int height = hsv.height();
 
         for(n=0; n < 80*pixcount; n++)
         {
@@ -124,6 +128,8 @@ public class BitmapScanner {
             y1 += rect.center.y;
 
             byte[] pix = new byte[3];
+            if (x1 < 0 || y1 < 0 || x1>= width || y1 >= height)
+                return null;
             hsv.get((int) y1, (int) x1, pix);
             //Display.put(new short[] { })
             if (pix == null)
@@ -153,6 +159,7 @@ public class BitmapScanner {
     }
 
     private String ScanPoints(List<byte[]> pts) {
+        log.info("scanPoints");
         String r = "";
         int ctr = 0;
         for(int n=0; n < 80; n++)
@@ -233,6 +240,7 @@ public class BitmapScanner {
     public synchronized String Scan() {
         String msg = "";
 
+        log.info("Start scan");
         int hueCentre1 = 146;
         int hueCentre2 = 235;
 
@@ -243,17 +251,12 @@ public class BitmapScanner {
         Display = original.clone();
 
 
-        Mat matTemp = original.clone();
-        Mat matTemp2 = new Mat();
         Mat matHSV = new Mat();
-
-        Mat matCenter = new Mat();
-        Mat matCenter2 = new Mat();
-        Mat matSurround = new Mat();
 
         Mat bgr = new Mat();
         Imgproc.cvtColor(original, bgr, Imgproc.COLOR_RGBA2BGR);
         Imgproc.cvtColor(bgr, matHSV, Imgproc.COLOR_BGR2HSV);
+
         RotatedRect ellipse = findEllipse(bgr);
 
 
@@ -304,140 +307,9 @@ public class BitmapScanner {
             msg += "E=err";
 
 
-        /*
-
-        // Core.inRange(out1, new Scalar(87, 80, 80), new Scalar(93, 255, 255), out1);
-
-        Imgproc.blur(matHSV, matHSV, new Size(10,10));
-        // extract center by hue
-        Core.inRange(matHSV, new Scalar((hueCentre1 * 180 / 256) - 8, 0, 120), new Scalar((hueCentre1 * 180 / 256) + 8, 235, 170), matCenter);
-        //Core.inRange(matHSV, new Scalar((hueCentre2 * 180 / 256) - 4, 70 70), new Scalar((hueCentre2 * 180 / 256) + 4, 255, 255), matCenter2);8
-        //Core.bitwise_and(matHSV, matCenter, matHSV);
-        Imgproc.Canny(matCenter, matCenter, 50f, 200f);
-
-
-        // extract surroung by value
-        //Core.inRange(matHSV, new Scalar(0, 0, 0), new Scalar(255, 255, 60), matSurround);
-
-
-        //Core.inRange(roiTmp, new Scalar(170, 70, 30), new Scalar(180, 255, 255), out2);
-        Mat lines = new Mat();
-        Imgproc.HoughLinesP(matCenter, lines, 1.0f, 3.14f/180f , 0, 15f, 0);
-
-
-        Imgproc.cvtColor(matCenter, display, Imgproc.COLOR_GRAY2RGBA, 0);
-
-        Imgproc.putText(display, Integer.toString(lines.rows()), new Point(50, 50), Core.FONT_HERSHEY_PLAIN, 2, new Scalar(255, 0, 0));
-
-        Mat hierarchy = new Mat();
-        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-        Imgproc.findContours(matCenter, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        int rows = lines.rows();
-        for(int n=0; n < rows; n++)
-        {
-            double[] vec = lines.get(n, 0);
-            double x1 = vec[0],
-                    y1 = vec[1],
-                    x2 = vec[2],
-                    y2 = vec[3];
-            Point start = new Point(x1, y1);
-            Point end = new Point(x2, y2);
-
-            Imgproc.line(display, start, end, new Scalar(255,0,0));
-            double dx = x1 - x2;
-            double dy = y1 - y2;
-
-        }
-
-        log.info("Countours:" + contours.size());
-        for (MatOfPoint contour:
-                contours) {
-            Point[] pts = contour.toArray();
-            double arr = Imgproc.contourArea(contour, false);
-            //log.info("Contour: " + arr + "  pts=" + pts.length);
-            //Imgproc.drawMarker(display, pts[0], new Scalar(255,0,0,0));
-            /*
-            if (pts.length < 5)
-                continue;
-
-
-            if (arr < 4000)
-                continue;
-
-            MatOfPoint2f  contour2f = new MatOfPoint2f( contour.toArray() );
-
-            RotatedRect r = Imgproc.fitEllipse(contour2f);
-            Point[] rectPoints = new Point[4];
-            r.points(rectPoints);
-            for(int n=0; n < 4; n++) {
-                Imgproc.line(display, rectPoints[n], rectPoints[(n+1)%4],
-                        new Scalar(0,255,0));
-            }
-            double ellArr = r.size.area() * 3.14 / 4;
-            */
-
-            //if (arr < ellArr *.8 || arr > ellArr*1.1)
-            //    continue;
-
-            //Point[] pts = contour.toArray();
-            //
-            /*
-
-
-            double arr = Imgproc.contourArea(contour, false);
-
-            MatOfPoint2f  contour2f = new MatOfPoint2f( contour.toArray() );
-
-            RotatedRect r = Imgproc.fitEllipse(contour2f);
-            Point[] rectPoints = new Point[4];
-            r.points(rectPoints);
-            for(int n=0; n < 4; n++) {
-                Imgproc.line(display, rectPoints[n], rectPoints[(n+1)%4],
-                    new Scalar(0,255,0));
-            }
-            double ellArr = r.size.area() * 3.14 / 4;
-
-            if (arr < ellArr *.9 || arr > ellArr*1.1)
-                continue;
-
-            log.info("CONTOUR2:" + r.size.width + ", " + r.size.height +","+ r.angle);
-
-
-            Point pt = r.center;
-
-            double angle = 0;
-            double step = (Math.PI * 2.0) / 80.0;
-
-            double rot = Math.toRadians(-r.angle);
-
-            for(int n=0; n < 80; n++)
-            {
-                /*
-                pt2.x += Math.cos(angle) * (r.size.width/2);
-                pt2.y += Math.sin(angle) * (r.size.height/2);
-
-                double x1 = Math.cos(angle) * (r.size.width/2);
-                double y1 = Math.sin(angle) * (r.size.height/2);
-
-                // rotation of ellipse
-                x1 = x1 * Math.cos(rot) - y1 * Math.sin(rot);
-                y1 = x1 * Math.sin(rot) + y1 * Math.cos(rot);
-
-                // offset of center of ellipse
-                x1 += r.center.x;
-                y1 += r.center.y;
-
-                Imgproc.drawMarker(display, new Point(x1,y1), new Scalar(0,0,255,0));
-
-                angle += step;
-
-            }
-            */
-
 
         Imgproc.putText(Display, msg, new Point(50, 50), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255, 0, 0));
-
+        log.info("Returning scan");
         this.Display = Display;
 
 

@@ -20,6 +20,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.logging.Logger;
 
 public class MainActivity extends AppCompatActivity {
@@ -94,8 +97,10 @@ public class MainActivity extends AppCompatActivity {
                 String msg = "";
                 if (IdentityManager.IsHash(hash))
                     msg = "Hash scanned: " + hash;
-                else if (IdentityManager.IsNonce(hash))
+                else if (IdentityManager.IsNonce(hash)) {
                     msg = "Nonce scanned: " + hash;
+                    Send(hash);
+                }
                 else
                     msg = "Not understood: " +hash;
 
@@ -108,6 +113,29 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    public void Send(String nonce) {
+
+        Uploader.UploadParams params = new Uploader.UploadParams();
+
+        //Create JSONObject here
+        try {
+            JSONObject jsonParam = new JSONObject();
+            jsonParam.put("nonce", nonce);
+            jsonParam.put("hash", IdentityManager.GetPublicKey(this));
+            params.jsonData = jsonParam.toString(2);
+        }
+        catch(JSONException ex) {
+            log.severe("Can't render json");
+            ex.printStackTrace();
+        }
+        params.bitmapData = null;
+        params.document = "_link";
+
+        new Uploader().execute(params);
+    }
+
+
 
 
     @Override
