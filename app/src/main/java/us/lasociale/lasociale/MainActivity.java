@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private void StartCamarea() {
         Intent intent = new Intent(this, CameraActivity.class);
         startActivityForResult(intent, 1);
+        //startActivity(intent);
 
     }
 

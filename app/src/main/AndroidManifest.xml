@@ -4,19 +4,24 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission
+        android:name="android.permission.FLASHLIGHT"
+        android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
+        android:protectionLevel="normal" />
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" />
+        android:required="true" />
     <uses-feature
         android:name="android.hardware.camera.autofocus"
-        android:required="false" />
+        android:required="true" />
     <uses-feature
         android:name="android.hardware.camera.front"
-        android:required="false" />
+        android:required="true" />
     <uses-feature
         android:name="android.hardware.camera.front.autofocus"
-        android:required="false" />
+        android:required="true" />
+
 
     <application
         android:name=".MainApp"
@@ -49,6 +54,10 @@
         <activity android:name=".CameraActivity"
 
             android:screenOrientation="landscape"></activity>
+        <activity android:name=".CameraActivity2"
+
+            ></activity>
+
     </application>
 
 </manifest>

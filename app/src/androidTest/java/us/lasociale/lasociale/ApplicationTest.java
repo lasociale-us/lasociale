@@ -1,7 +1,7 @@
 package us.lasociale.lasociale;
 
 
-import org.junit.Test
+
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
@@ -14,11 +14,6 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         super(Application.class);
     }
 
-
-    @Test
-    public void testBitmapScanner() {
-        Assert.assertTrue(false);
-    }
 
 
 }
