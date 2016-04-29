@@ -523,11 +523,11 @@ public class BitmapScanner {
             base_angle = angle;
             //log.info("base=" + base_angle + ",v="+minv + ",ss="+ss);
 
-            double width = 0.006;
-            Point pt1 = fromPolar(ellipse, angle-width, 8.4);
+            double width = 0.018;
+            Point pt1 = fromPolar(ellipse, angle-width, 9.4);
             Point pt2 = fromPolar(ellipse, angle-width, 10.4);
             Point pt3 = fromPolar(ellipse, angle+width, 10.4);
-            Point pt4 = fromPolar(ellipse, angle+width, 8.4);
+            Point pt4 = fromPolar(ellipse, angle+width, 9.4);
 /*              Imgproc.line(Display, pt1,pt2, new Scalar(0,255,0));
             Imgproc.line(Display, pt2,pt3, new Scalar(0,255,0));
             Imgproc.line(Display, pt3,pt4, new Scalar(0,255,0));
@@ -539,6 +539,7 @@ public class BitmapScanner {
                 Imgproc.fillConvexPoly(msk, pts, new Scalar(255));
                 Imgproc.fillConvexPoly(Display, pts, new Scalar(0,255,255));
                 Scalar s = Core.mean(bgr, msk);
+
 //                    msg += s.val[0]+",";
 //                  log.info(Double.toString(s.val[0]- s.val[2]));
                 bits += (s.val[0]- s.val[2] < 0.0 ? "0" : "1");
