@@ -122,7 +122,6 @@ def check_checksum(bts):
     chk2 = (n1>>8) & 0xFF
     return (bts[8] == chk1) and (bts[9] == chk2)
 
-
 def check_hash(h, skip=0):
 
     SPEC1 = '10011000'; # 0x98
@@ -142,7 +141,6 @@ def check_hash(h, skip=0):
         sbyt = int(hsh[n*8:n*8+8],2)
         bts.append(sbyt)
 
-    print("TRY:"+ lhex(bts))
     if check_checksum(bts):
         print("FOUND correct hash:" + lhex(bts))
         return True

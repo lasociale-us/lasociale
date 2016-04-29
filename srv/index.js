@@ -154,10 +154,20 @@ function createSVG(req, hash, we, me)
     var maxRadius = 140
     var styleMe = ' style="fill:none;stroke:#EF5AA0;stroke-width:2.2677;stroke-miterlimit:10;" ';
     var styleWe = ' style="fill:none;stroke:#37B34A;stroke-width:3.4016;stroke-miterlimit:10;" ';
-    var styleT1 = ' style="fill:none;stroke:#1B75BB;stroke-width:0.9921;stroke-miterlimit:10;" ';   
-    var styleT2 = ' style="fill:none;stroke:#9b7913;stroke-width:0.9921;stroke-miterlimit:10;" ';   
+    
+    // hue = 200/255 = 141/180
+    //var styleT1 = ' style="fill:none;stroke:#b501ff;stroke-width:1.4921;stroke-miterlimit:10;" ';   
+    //
+    // hue = 134/255 = 95
+    //var styleT2 = ' style="fill:none;stroke:#01d8ff;stroke-width:1.4921;stroke-miterlimit:10;" ';   
 
+    var styleT1 = ' style="fill:none;stroke:#ff1111;stroke-width:1.9921;stroke-miterlimit:10;" ';   
+    //
+    var styleT2 = ' style="fill:none;stroke:#1111ff;stroke-width:1.9921;stroke-miterlimit:10;" ';   
 
+    //var styleT1 = ' style="fill:#bbaa11;stroke:#bbaa11;stroke-width:1.9921;stroke-miterlimit:10;" ';   
+    //
+    //var styleT2 = ' style="fill:#aa11bb;stroke:#aa11bb;stroke-width:1.9921;stroke-miterlimit:10;" ';   
     var radiusMe;
     if (me)
         radiusMe = maxRadius * (me.lasociale / me.elapsed);
@@ -171,23 +181,39 @@ function createSVG(req, hash, we, me)
     var linesMe = '<g id="me_0_x2C_8">\n';
     var linesWe = '<g id="we_1_x2C_2">\n';
     var linesTotal = '<g id="total_0_x2C_35_sign">\n';
+    var rnd = Math.random()*80;
     for (var n=0; n < 80; n++) {
         var x1 = centerX;
         var y1 = centerY;
         angle = PI*2 * n / 80;
         var x2 = centerX + Math.cos(angle)*radiusMe;
         var y2 = centerY + Math.sin(angle)*radiusMe
-        linesMe += '<line '+styleMe+' x1="'+x1+'" y1="'+y1+'" x2="' + x2 + '" y2="' + y2 + '" />\n';
+        
+        if (n > rnd && n < rnd+1)
+            linesMe += '<line '+styleMe+' x1="'+x1+'" y1="'+y1+'" x2="' + x2 + '" y2="' + y2 + '" />\n';
 
         var x2 = centerX + Math.cos(angle)*radiusWe;
         var y2 = centerY + Math.sin(angle)*radiusWe
         linesWe += '<line '+styleWe+' x1="'+x1+'" y1="'+y1+'" x2="' + x2 + '" y2="' + y2 + '" />\n';
 
         var x2 = centerX + Math.cos(angle)*radiusTotal;
-        var y2 = centerY + Math.sin(angle)*radiusTotal
+        var y2 = centerY + Math.sin(angle)*radiusTotal;
+        var x3 = centerX + Math.cos(angle)*radiusTotal*.95;
+        var y3 = centerY + Math.sin(angle)*radiusTotal*.95;
+
+        var arange = 2 * PI / 80 ;
+        var x4 = centerX + Math.cos(angle+arange)*radiusTotal;
+        var y4 = centerY + Math.sin(angle+arange)*radiusTotal;
+        var x5 = centerX + Math.cos(angle+arange)*radiusTotal*.95;
+        var y5 = centerY + Math.sin(angle+arange)*radiusTotal*.95;
         var color = getBit(hash, n) ? styleT2 : styleT1;
         linesTotal += '<line ' + color + ' x1="'+x1+'" y1="'+y1+'" x2="' + x2 + '" y2="' + y2 + '" />\n';
-
+        /*linesTotal += '<path ' + color + 
+            ' d="M' + x2 + ' ' + y2 + ' ' +
+            '    L' + x3 + ' ' + y3 + ' ' +
+            '    L' + x5 + ' ' + y5 + ' ' +
+            '    L' + x4 + ' ' + y4 + ' Z" />' ;
+*/
         angle += step;
 
     }
@@ -196,12 +222,7 @@ function createSVG(req, hash, we, me)
     linesTotal += '</g>\n';
 
     var total;
-    if (radiusMe < radiusWe)
-    {
-        total = linesTotal + linesWe + linesMe;
-    }
-    else
-        total = linesTotal + linesMe + linesWe;
+    total = linesTotal + linesWe + linesMe;
     //reload template
     var svgTemplate = fs.readFileSync('template.svg', {encoding:'utf8'});
     var style = '#me_2_ { transform: scale(0.2); }\n';
@@ -315,6 +336,13 @@ function handleTest(req, res) {
     res.send(html).end();
 }
 
+function handleScript(req, res) {
+    var js = fs.readFileSync('lasociale.js', {encoding:'utf8'});
+    res.setHeader('Content-Type', 'application/javascript');
+
+    res.send(js).end();
+}
+
 
 app.put(/^\/[^_].*/, handlePut);
 app.get(/^\/[^_].*/, handleGet);
@@ -322,6 +350,7 @@ app.put(/^\/_testcase/, handleTestcase);
 app.get(/^\/_render/, handleRender);
 app.get(/^\/_test/, handleTest);
 app.put(/^\/_link/, handleLink);
+app.get(/^\/_script/, handleScript);
 
 
 app.listen(3333);
