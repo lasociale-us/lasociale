@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 public class ActivityStorage {
 
 
-    private static String PREF_NAME = "lasociale.3";
+    private static String PREF_NAME = "lasociale.4";
 
     private static String S_RECORDED_SECS   = "recorded-secs";
     private static String S_LASTSTAMP       = "last-stamp";

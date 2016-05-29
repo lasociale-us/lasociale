@@ -2,6 +2,7 @@ package us.lasociale.lasociale;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -95,6 +96,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
         log.info("Start Receive Frame");
+
+
         synchronized (this) {
             lastFrame = inputFrame.rgba();
         }

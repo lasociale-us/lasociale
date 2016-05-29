@@ -13,7 +13,7 @@ import java.security.spec.ECGenParameterSpec;
  * Created by tomas on 22-3-16.
  */
 public class IdentityManager {
-    private static String PREF_NAME = "lasociale-sec.11";
+    private static String PREF_NAME = "lasociale-sec.12";
 
     private static String S_PUB = "pub";
     private static String S_PRV = "prv";
